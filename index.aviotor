@@ -1,0 +1,652 @@
+1<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Money Maker · control panel</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      user-select: none;
+    }
+
+    body {
+      font-family: system-ui, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      background: linear-gradient(145deg, #0b1a2e 0%, #1a2f3f 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 16px;
+      margin: 0;
+    }
+
+    .app-container {
+      max-width: 1200px;
+      width: 100%;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(4px);
+      border-radius: 48px;
+      padding: 24px;
+      box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.6), inset 0 1px 2px rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 215, 0, 0.2);
+    }
+
+    .main-grid {
+      display: grid;
+      grid-template-columns: 1.2fr 0.9fr;
+      gap: 24px;
+      align-items: stretch;
+    }
+
+    /* PLAYER ZONE (make money & won) */
+    .player-zone {
+      background: #0f1c2b;
+      border-radius: 40px;
+      padding: 28px 24px;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7), 0 6px 0 #030b12;
+      border: 1px solid #2e4a5f;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.15s;
+    }
+
+    .player-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+
+    .balance-box {
+      background: #1e2f40;
+      padding: 14px 24px;
+      border-radius: 100px;
+      border: 1px solid #f0c45a;
+      box-shadow: 0 0 12px rgba(240, 196, 90, 0.3), inset 0 2px 4px rgba(255, 255, 200, 0.1);
+    }
+
+    .balance-label {
+      font-size: 0.8rem;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #aac7db;
+    }
+
+    .balance-amount {
+      font-size: 2.4rem;
+      font-weight: 800;
+      color: #ffd966;
+      line-height: 1.2;
+      text-shadow: 0 0 10px #ffb347;
+      transition: 0.1s;
+    }
+
+    .balance-amount small {
+      font-size: 1.2rem;
+      font-weight: 400;
+      color: #b8d0e0;
+      margin-left: 6px;
+    }
+
+    .tap-area {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      flex: 1;
+      gap: 28px;
+      margin: 8px 0;
+    }
+
+    .big-tap-btn {
+      width: 220px;
+      height: 220px;
+      border-radius: 50%;
+      background: radial-gradient(circle at 30% 25%, #ffe28a, #e6a017);
+      border: 8px solid #b97f1a;
+      box-shadow: 0 16px 0 #7a520e, 0 20px 30px rgba(0, 0, 0, 0.6), inset 0 8px 12px rgba(255, 255, 220, 0.5);
+      cursor: pointer;
+      transition: all 0.07s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 4rem;
+      font-weight: 900;
+      color: #3a2503;
+      text-shadow: 2px 2px 0 #ffcd7e;
+      letter-spacing: 2px;
+      transform: translateY(0);
+    }
+
+    .big-tap-btn:active {
+      transform: translateY(12px);
+      box-shadow: 0 4px 0 #7a520e, 0 12px 24px rgba(0, 0, 0, 0.6), inset 0 8px 12px rgba(255, 255, 220, 0.5);
+    }
+
+    .big-tap-btn:disabled {
+      opacity: 0.45;
+      transform: translateY(10px);
+      box-shadow: 0 6px 0 #5f3f08, 0 8px 18px rgba(0, 0, 0, 0.5);
+      pointer-events: none;
+      filter: grayscale(0.5);
+    }
+
+    .tap-hint {
+      color: #b7d0e5;
+      font-size: 1rem;
+      letter-spacing: 0.5px;
+      background: #1a2f3f;
+      padding: 8px 20px;
+      border-radius: 40px;
+      border: 1px solid #3b5b6e;
+    }
+
+    .win-section {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: #1c2d3b;
+      border-radius: 100px;
+      padding: 8px 8px 8px 24px;
+      margin-top: 16px;
+      border: 1px solid #3d6075;
+    }
+
+    .win-label {
+      color: #dbecff;
+      font-weight: 600;
+      font-size: 1.2rem;
+    }
+
+    .win-btn {
+      background: #1f7a4b;
+      border: none;
+      color: white;
+      font-weight: 700;
+      padding: 16px 36px;
+      border-radius: 40px;
+      font-size: 1.25rem;
+      letter-spacing: 1px;
+      cursor: pointer;
+      transition: all 0.1s;
+      box-shadow: 0 6px 0 #0b3b25, 0 6px 12px black;
+      transform: translateY(0);
+      border: 1px solid #53c07e;
+    }
+
+    .win-btn:active {
+      transform: translateY(6px);
+      box-shadow: 0 2px 0 #0b3b25, 0 8px 16px black;
+    }
+
+    .win-btn:disabled {
+      opacity: 0.4;
+      transform: translateY(4px);
+      box-shadow: 0 2px 0 #0b3b25;
+      pointer-events: none;
+      filter: grayscale(0.7);
+    }
+
+    /* CONTROL PANEL (YOU control) */
+    .control-panel {
+      background: #1e2b36;
+      border-radius: 40px;
+      padding: 28px 24px;
+      border: 2px solid #ca9e2b;
+      box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.7), 0 6px 0 #0a151e;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .control-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: #f5d97e;
+      text-shadow: 0 2px 0 #3a2705;
+      border-bottom: 2px dashed #a88638;
+      padding-bottom: 14px;
+      letter-spacing: 1px;
+    }
+
+    .control-title span {
+      font-size: 2rem;
+      margin-right: 6px;
+    }
+
+    .control-section {
+      background: #0e1a24;
+      border-radius: 28px;
+      padding: 18px 16px;
+      border: 1px solid #4b6c82;
+      box-shadow: inset 0 2px 6px black;
+    }
+
+    .control-section h3 {
+      color: #c9deff;
+      font-size: 0.95rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .reward-row {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+
+    .reward-option {
+      flex: 1;
+      background: #192f3f;
+      border: 2px solid #3e6177;
+      border-radius: 16px;
+      padding: 10px 0;
+      text-align: center;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #e7c45e;
+      cursor: pointer;
+      transition: all 0.1s;
+      box-shadow: 0 4px 0 #0e1a24;
+    }
+
+    .reward-option.selected {
+      background: #2e4e62;
+      border-color: #f5d742;
+      color: #fff3b0;
+      box-shadow: 0 0 12px #ffbb33, 0 2px 0 #0e1a24;
+      transform: translateY(2px);
+    }
+
+    .control-btn {
+      background: #364f62;
+      color: white;
+      border: none;
+      border-radius: 40px;
+      padding: 12px 16px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.1s;
+      box-shadow: 0 5px 0 #17232e;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      border: 1px solid #5f829a;
+      letter-spacing: 0.5px;
+      transform: translateY(0);
+    }
+
+    .control-btn:active {
+      transform: translateY(5px);
+      box-shadow: 0 1px 0 #17232e;
+    }
+
+    .control-btn.danger {
+      background: #8b3a3a;
+      border-color: #c55a5a;
+      box-shadow: 0 5px 0 #4d1e1e;
+    }
+
+    .control-btn.warning {
+      background: #9b6f1f;
+      border-color: #e0b34b;
+      box-shadow: 0 5px 0 #5e3f0c;
+    }
+
+    .control-btn.success {
+      background: #1f7a4b;
+      border-color: #4bc07e;
+      box-shadow: 0 5px 0 #0f3e26;
+    }
+
+    .status-badge {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #07131c;
+      padding: 12px 16px;
+      border-radius: 30px;
+      border: 1px solid #436b82;
+    }
+
+    .status-text {
+      color: #aac7e0;
+      font-weight: 500;
+    }
+
+    .status-value {
+      font-weight: 800;
+      color: #ffd966;
+      font-size: 1.5rem;
+      letter-spacing: 1px;
+    }
+
+    .lock-overlay {
+      background: #2a1a10;
+      border-radius: 20px;
+      padding: 12px;
+      text-align: center;
+      color: #ffb374;
+      border: 1px solid #a8662a;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+
+    /* responsive */
+    @media (max-width: 850px) {
+      .main-grid {
+        grid-template-columns: 1fr;
+      }
+      .app-container {
+        padding: 16px;
+        border-radius: 32px;
+      }
+      .big-tap-btn {
+        width: 180px;
+        height: 180px;
+        font-size: 3.2rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <div class="main-grid">
+      <!-- LEFT: PLAYER ZONE (money / won) -->
+      <div class="player-zone" id="playerZone">
+        <div class="player-header">
+          <div class="balance-box">
+            <div class="balance-label">YOUR MONEY</div>
+            <div class="balance-amount" id="balanceDisplay">0<small>💰</small></div>
+          </div>
+          <div class="win-section" style="margin-top:0; background:transparent; padding:0; border:none;">
+            <span class="win-label" style="background:#1c2d3b; padding:10px 18px; border-radius:40px;">
+              🏆 Wins: <span id="winsCounter">0</span>
+            </span>
+          </div>
+        </div>
+
+        <div class="tap-area">
+          <button class="big-tap-btn" id="tapBtn" aria-label="Make money">💵</button>
+          <div class="tap-hint" id="tapHint">tap to earn money</div>
+        </div>
+
+        <div class="win-section">
+          <span class="win-label">🎲 WIN BIG</span>
+          <button class="win-btn" id="winBtn">WIN $50</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: CONTROL PANEL (YOU CONTROL EVERYTHING) -->
+      <div class="control-panel">
+        <div class="control-title">
+          <span>🎛️</span> MASTER CONTROL
+        </div>
+
+        <!-- reward / cost configuration -->
+        <div class="control-section">
+          <h3>⚙️ TAP REWARD</h3>
+          <div class="reward-row" id="rewardOptions">
+            <div class="reward-option" data-reward="1">+$1</div>
+            <div class="reward-option selected" data-reward="2">+$2</div>
+            <div class="reward-option" data-reward="5">+$5</div>
+            <div class="reward-option" data-reward="10">+$10</div>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="control-btn warning" id="resetBalanceBtn">💰 Reset balance</button>
+            <button class="control-btn danger" id="resetWinsBtn">🏆 Reset wins</button>
+          </div>
+        </div>
+
+        <!-- WIN configuration and overrides -->
+        <div class="control-section">
+          <h3>🏅 WIN CONTROLS</h3>
+          <div class="status-badge">
+            <span class="status-text">Win reward</span>
+            <span class="status-value" id="winRewardDisplay">$50</span>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:14px;">
+            <button class="control-btn" id="winRewardMinus">− $10</button>
+            <button class="control-btn" id="winRewardPlus">+ $10</button>
+          </div>
+          <div style="display:flex; gap:8px; margin-top:12px;">
+            <button class="control-btn success" id="forceWinBtn">⚡ FORCE WIN (add win)</button>
+          </div>
+          <div style="margin-top:12px;">
+            <button class="control-btn danger" id="disableWinBtn">🚫 Disable win button</button>
+            <button class="control-btn success" id="enableWinBtn" style="margin-top:8px;">✅ Enable win button</button>
+          </div>
+        </div>
+
+        <!-- GLOBAL CONTROLS -->
+        <div class="control-section">
+          <h3>🔒 LOCK / UNLOCK TAP</h3>
+          <div style="display:flex; gap:8px;">
+            <button class="control-btn danger" id="lockTapBtn">🔒 Lock tap</button>
+            <button class="control-btn success" id="unlockTapBtn">🔓 Unlock tap</button>
+          </div>
+        </div>
+
+        <!-- current reward indicator -->
+        <div class="lock-overlay" id="statusMessage">
+          You control everything. Tap reward: +$2
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ---------- STATE ----------
+      let balance = 0;
+      let wins = 0;
+      let tapReward = 2;           // default +$2
+      let winReward = 50;          // default $50 win
+      let tapEnabled = true;       // user can tap?
+      let winEnabled = true;       // win button enabled?
+
+      // DOM elements
+      const balanceDisplay = document.getElementById('balanceDisplay');
+      const winsCounter = document.getElementById('winsCounter');
+      const tapBtn = document.getElementById('tapBtn');
+      const winBtn = document.getElementById('winBtn');
+      const tapHint = document.getElementById('tapHint');
+      const winRewardDisplay = document.getElementById('winRewardDisplay');
+      const statusMessage = document.getElementById('statusMessage');
+      const rewardOptions = document.querySelectorAll('.reward-option');
+
+      // Helper to update UI
+      function updateUI() {
+        // balance display with small coin
+        balanceDisplay.innerHTML = `${balance}<small>💰</small>`;
+        winsCounter.textContent = wins;
+        winRewardDisplay.textContent = `$${winReward}`;
+        winBtn.textContent = `WIN $${winReward}`;
+
+        // enable/disable tap button based on tapEnabled
+        tapBtn.disabled = !tapEnabled;
+        // update tap hint
+        if (tapEnabled) {
+          tapHint.textContent = `tap to earn +$${tapReward}`;
+          tapHint.style.opacity = '1';
+        } else {
+          tapHint.textContent = `⛔ tap is locked by admin`;
+          tapHint.style.opacity = '0.8';
+        }
+
+        // enable/disable win button based on winEnabled (and also if winReward <=0? but we keep winReward positive)
+        winBtn.disabled = !winEnabled;
+
+        // update status message
+        let msg = `🔧 CONTROL ACTIVE · tap reward: +$${tapReward} · win: $${winReward}`;
+        if (!tapEnabled) msg += ` · TAP LOCKED`;
+        if (!winEnabled) msg += ` · WIN DISABLED`;
+        statusMessage.textContent = msg;
+
+        // highlight selected reward option
+        rewardOptions.forEach(opt => {
+          const val = parseInt(opt.getAttribute('data-reward'), 10);
+          if (val === tapReward) {
+            opt.classList.add('selected');
+          } else {
+            opt.classList.remove('selected');
+          }
+        });
+      }
+
+      // ---------- player actions ----------
+      function handleTap() {
+        if (!tapEnabled) return;
+        balance += tapReward;
+        updateUI();
+        // tiny visual feedback
+        tapBtn.style.transform = 'scale(0.96)';
+        setTimeout(() => { tapBtn.style.transform = ''; }, 70);
+      }
+
+      function handleWin() {
+        if (!winEnabled) return;
+        // win adds winReward to balance AND increments wins counter
+        balance += winReward;
+        wins += 1;
+        updateUI();
+        // animation on win button
+        winBtn.style.transform = 'scale(0.94)';
+        setTimeout(() => { winBtn.style.transform = ''; }, 100);
+      }
+
+      // ---------- control panel functions (admin) ----------
+      // Reward option click
+      rewardOptions.forEach(opt => {
+        opt.addEventListener('click', (e) => {
+          const reward = parseInt(opt.getAttribute('data-reward'), 10);
+          if (!isNaN(reward)) {
+            tapReward = reward;
+            updateUI();
+          }
+        });
+      });
+
+      // Reset balance
+      document.getElementById('resetBalanceBtn').addEventListener('click', () => {
+        balance = 0;
+        updateUI();
+      });
+
+      // Reset wins
+      document.getElementById('resetWinsBtn').addEventListener('click', () => {
+        wins = 0;
+        updateUI();
+      });
+
+      // Win reward + / -
+      document.getElementById('winRewardPlus').addEventListener('click', () => {
+        winReward = Math.min(winReward + 10, 500); // cap at 500
+        updateUI();
+      });
+      document.getElementById('winRewardMinus').addEventListener('click', () => {
+        winReward = Math.max(winReward - 10, 10); // min 10
+        updateUI();
+      });
+
+      // Force win (add win without needing to press win button? but same as pressing win, but bypass winEnabled)
+      document.getElementById('forceWinBtn').addEventListener('click', () => {
+        // Force a win even if win button disabled – adds winReward and increments wins
+        balance += winReward;
+        wins += 1;
+        updateUI();
+      });
+
+      // Disable win button (but keep enabled state false)
+      document.getElementById('disableWinBtn').addEventListener('click', () => {
+        winEnabled = false;
+        updateUI();
+      });
+
+      // Enable win button
+      document.getElementById('enableWinBtn').addEventListener('click', () => {
+        winEnabled = true;
+        updateUI();
+      });
+
+      // Lock tap (disable tap button)
+      document.getElementById('lockTapBtn').addEventListener('click', () => {
+        tapEnabled = false;
+        updateUI();
+      });
+
+      // Unlock tap
+      document.getElementById('unlockTapBtn').addEventListener('click', () => {
+        tapEnabled = true;
+        updateUI();
+      });
+
+      // ---------- attach event listeners to player buttons ----------
+      tapBtn.addEventListener('click', handleTap);
+      winBtn.addEventListener('click', handleWin);
+
+      // Initialize UI
+      updateUI();
+
+      // extra: double-check if any reward option is selected; default selected is +$2, already set via class
+      // but ensure state tapReward = 2 matches. ok.
+
+      // Optional: keyboard accessibility for tap (space/enter already on button)
+      // also prevent double-tap zoom on mobile
+      tapBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        handleTap();
+      }, { passive: false });
+
+      // prevent double firing on winBtn from touch + click
+      let winTouch = false;
+      winBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (!winTouch) {
+          winTouch = true;
+          handleWin();
+          setTimeout(() => { winTouch = false; }, 200);
+        }
+      }, { passive: false });
+      winBtn.addEventListener('click', (e) => {
+        // if touch just happened, skip click to avoid double
+        if (winTouch) return;
+        handleWin();
+      });
+
+      // same for tap: avoid double firing
+      let tapTouch = false;
+      tapBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (!tapTouch) {
+          tapTouch = true;
+          handleTap();
+          setTimeout(() => { tapTouch = false; }, 200);
+        }
+      }, { passive: false });
+      tapBtn.addEventListener('click', (e) => {
+        if (tapTouch) return;
+        handleTap();
+      });
+
+      // prevent context menu on long press (mobile)
+      tapBtn.addEventListener('contextmenu', (e) => e.preventDefault());
+      winBtn.addEventListener('contextmenu', (e) => e.preventDefault());
+    })();
+  </script>
+</body>
+</html>
+2
